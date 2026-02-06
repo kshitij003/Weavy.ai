@@ -11,8 +11,6 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.37.2",
-    "@ffmpeg/ffmpeg": "^0.12.15",
-    "@ffmpeg/util": "^0.12.2",
     "@google/generative-ai": "^0.24.1",
     "@google/model-viewer": "^4.1.0",
     "@prisma/client": "^5.22.0",
