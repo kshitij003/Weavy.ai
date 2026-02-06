@@ -1,23 +1,18 @@
 import { task, logger } from "@trigger.dev/sdk/v3";
-import ffmpeg from "fluent-ffmpeg";
-import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { fetchFile, toBlobURL } from "@ffmpeg/util";
 import fs from "fs/promises";
 import path from "path";
 import os from "os";
 import { v4 as uuidv4 } from "uuid";
 
-ffmpeg.setFfmpegPath(ffmpegInstaller.path);
-// Note: Using ffprobe bundled with ffmpeg package
-ffmpeg.setFfprobePath(ffmpegInstaller.path.replace('ffmpeg', 'ffprobe'));
-
 export const cropImage = task({
     id: "crop-image",
     maxDuration: 300,
     run: async (payload: { image: string; x: number; y: number; width: number; height: number }, { ctx }) => {
-        logger.log("Starting Crop Image task (FFmpeg)", { payload });
+        logger.log("Starting Crop Image task (ffmpeg.wasm)", { payload });
 
         const tmpDir = os.tmpdir();
-        // ffmpeg on windows can be picky about paths.
         const inputPath = path.join(tmpDir, `${uuidv4()}_input.png`);
         const outputPath = path.join(tmpDir, `${uuidv4()}_output.png`);
 
@@ -57,61 +52,51 @@ export const cropImage = task({
                 }
             }
 
-            // 2. Get Image Metadata (Dimensions)
-            const dimensions = await new Promise<{ width: number, height: number }>((resolve, reject) => {
-                ffmpeg.ffprobe(inputPath, (err: any, metadata: any) => {
-                    if (err) reject(err);
-                    else {
-                        const stream = metadata.streams.find((s: any) => s.width && s.height);
-                        if (stream && stream.width && stream.height) {
-                            resolve({ width: stream.width, height: stream.height });
-                        } else {
-                            reject(new Error("Could not determine dimensions"));
-                        }
-                    }
-                });
+            // 2. Initialize FFmpeg.wasm
+            const ffmpeg = new FFmpeg();
+            const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+
+            await ffmpeg.load({
+                coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+                wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
             });
 
-            const { width: imgW, height: imgH } = dimensions;
+            logger.log("FFmpeg.wasm loaded successfully");
 
-            // Calculate Crop Parameters
-            const xPx = Math.round((payload.x / 100) * imgW);
-            const yPx = Math.round((payload.y / 100) * imgH);
-            const wPx = Math.round((payload.width / 100) * imgW);
-            const hPx = Math.round((payload.height / 100) * imgH);
+            // 3. Read input file and write to FFmpeg virtual filesystem
+            const inputData = await fs.readFile(inputPath);
+            await ffmpeg.writeFile('input.png', inputData);
 
-            // Validate
-            const finalX = Math.max(0, xPx);
-            const finalY = Math.max(0, yPx);
-            const finalW = Math.min(wPx, imgW - finalX);
-            const finalH = Math.min(hPx, imgH - finalY);
+            // 4. Calculate Crop Parameters (as percentages to pixels)
+            // For simplicity with ffmpeg.wasm, we'll use the scale filter
+            // First get dimensions - we'll assume standard dimensions or use a probe
+            // For now, let's use the percentage directly in the crop filter
 
-            logger.log("FFmpeg Crop Params", { finalW, finalH, finalX, finalY });
+            const xPx = payload.x;
+            const yPx = payload.y;
+            const wPx = payload.width;
+            const hPx = payload.height;
 
-            // 3. Run FFmpeg Crop
-            await new Promise((resolve, reject) => {
-                ffmpeg(inputPath)
-                    .outputOptions([
-                        `-vf crop=${finalW}:${finalH}:${finalX}:${finalY}`
-                    ])
-                    .on('end', resolve)
-                    .on('error', (err: any) => {
-                        logger.error("FFmpeg error", { err });
-                        reject(err);
-                    })
-                    .save(outputPath);
-            });
+            logger.log("Crop params (percentages)", { xPx, yPx, wPx, hPx });
 
-            // 4. Read Output
-            const outputBuffer = await fs.readFile(outputPath);
-            const base64Output = `data:image/png;base64,${outputBuffer.toString('base64')}`;
+            // 5. Run FFmpeg crop command
+            // crop filter syntax: crop=w:h:x:y (all in pixels or use iw/ih for input width/height)
+            const cropFilter = `crop=iw*${wPx / 100}:ih*${hPx / 100}:iw*${xPx / 100}:ih*${yPx / 100}`;
+
+            await ffmpeg.exec(['-i', 'input.png', '-vf', cropFilter, 'output.png']);
+
+            logger.log("FFmpeg.wasm crop completed");
+
+            // 6. Read output from FFmpeg virtual filesystem
+            const outputData = await ffmpeg.readFile('output.png');
+            const base64Output = `data:image/png;base64,${Buffer.from(outputData as Uint8Array).toString('base64')}`;
 
             return {
                 image: base64Output,
             };
 
         } catch (error) {
-            logger.error("FFmpeg Crop task failed", { error });
+            logger.error("FFmpeg.wasm Crop task failed", { error });
             throw error;
         } finally {
             // Cleanup

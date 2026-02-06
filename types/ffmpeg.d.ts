@@ -1,11 +1,19 @@
-declare module 'fluent-ffmpeg' {
-    const ffmpeg: any;
-    export default ffmpeg;
+declare module '@ffmpeg/ffmpeg' {
+    export class FFmpeg {
+        load(options: {
+            coreURL: string;
+            wasmURL: string;
+        }): Promise<void>;
+        writeFile(path: string, data: Uint8Array | Buffer): Promise<void>;
+        readFile(path: string): Promise<Uint8Array>;
+        exec(args: string[]): Promise<void>;
+        terminate(): Promise<void>;
+    }
 }
 
-declare module '@ffmpeg-installer/ffmpeg' {
-    export const path: string;
-    export const version: string;
+declare module '@ffmpeg/util' {
+    export function fetchFile(source: string | File | Blob): Promise<Uint8Array>;
+    export function toBlobURL(url: string, mimeType: string): Promise<string>;
 }
 
 declare module 'uuid' {
