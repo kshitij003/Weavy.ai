@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import '@google/model-viewer'; // ✅ Import ONCE at app level to prevent duplicate custom element registration
 
 // -----------------------------------------------------------------------------
 // ✅ CRITICAL FIX: Use Dynamic Imports with { ssr: false }
@@ -23,6 +22,9 @@ export default function Home() {
 
   useEffect(() => {
     setIsMounted(true);
+
+    // ✅ Import model-viewer ONLY on client side to prevent SSR "self is not defined" error
+    import('@google/model-viewer').catch(err => console.error('Failed to load model-viewer:', err));
 
     // Load all external scripts
     const loadScript = (src: string) => {
