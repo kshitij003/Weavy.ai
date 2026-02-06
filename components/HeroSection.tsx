@@ -8,11 +8,6 @@ declare global {
         LeaderLine: any;
         Draggable: any;
     }
-    namespace JSX {
-        interface IntrinsicElements {
-            'model-viewer': any;
-        }
-    }
 }
 
 export default function HeroSection() {
