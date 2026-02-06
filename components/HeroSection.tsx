@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import '@google/model-viewer';
 
 declare global {
     interface Window {

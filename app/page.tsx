@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
+import '@google/model-viewer'; // ✅ Import ONCE at app level to prevent duplicate custom element registration
 
 // -----------------------------------------------------------------------------
 // ✅ CRITICAL FIX: Use Dynamic Imports with { ssr: false }
