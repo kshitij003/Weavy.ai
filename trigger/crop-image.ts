@@ -5,12 +5,12 @@ import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
 
-// Configure ffmpeg - we rely on the system ffmpeg installed via trigger.config.ts
-// or local ffmpeg if available in PATH.
-// const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
-// const ffprobePath = require('@ffprobe-installer/ffprobe').path;
-// ffmpeg.setFfmpegPath(ffmpegPath);
-// ffmpeg.setFfprobePath(ffprobePath);
+// Configure ffmpeg - Explicitly set paths for Linux (Trigger.dev environment)
+// to avoid "Cannot find ffprobe" errors from fluent-ffmpeg's auto-detection.
+if (process.platform === 'linux') {
+    ffmpeg.setFfmpegPath('/usr/bin/ffmpeg');
+    ffmpeg.setFfprobePath('/usr/bin/ffprobe');
+}
 
 export const cropImage = task({
     id: "crop-image",
