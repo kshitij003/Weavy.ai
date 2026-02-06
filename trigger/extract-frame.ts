@@ -50,7 +50,15 @@ export const extractFrame = task({
                 inputSource = payload.video; // FFmpeg supports URLs
             } else if (payload.video.startsWith("/")) {
                 // Handle local public files (Development mode)
-                inputSource = path.join(process.cwd(), "public", payload.video);
+                const localPath = path.join(process.cwd(), "public", payload.video);
+
+                // ✅ Check if file exists before using it
+                try {
+                    await fs.access(localPath);
+                    inputSource = localPath;
+                } catch (err) {
+                    throw new Error(`Video file not found in public directory: ${payload.video}. Make sure the file exists or use a base64 data URL instead.`);
+                }
             } else {
                 throw new Error("Invalid video source. Must be a Data URL, HTTP URL, or local public path (starting with /).");
             }
