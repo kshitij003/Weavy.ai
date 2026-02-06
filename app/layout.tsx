@@ -42,9 +42,7 @@ export default function RootLayout({
                     </Script>
                     <Script src="https://cdn.firstpromoter.com/fpr.js" async />
 
-
-                    {/* Model Viewer for 3d animations */}
-                    <Script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js" />
+                    {/* Model Viewer loads dynamically in page.tsx to prevent duplicate registration */}
 
                     {/* Splide CSS for sliders */}
                     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@3.2.2/dist/css/splide-core.min.css" />
