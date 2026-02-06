@@ -1,5 +1,6 @@
 declare module '@ffmpeg/ffmpeg' {
     export class FFmpeg {
+        loaded: boolean;
         load(options: {
             coreURL: string;
             wasmURL: string;
@@ -7,6 +8,7 @@ declare module '@ffmpeg/ffmpeg' {
         writeFile(path: string, data: Uint8Array | Buffer): Promise<void>;
         readFile(path: string): Promise<Uint8Array>;
         exec(args: string[]): Promise<void>;
+        on(event: 'log', callback: (data: { message: string }) => void): void;
         terminate(): Promise<void>;
     }
 }

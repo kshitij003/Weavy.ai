@@ -60,44 +60,56 @@ export const extractFrame = task({
             const inputData = await fs.readFile(inputPath);
             await ffmpeg.writeFile('input.mp4', inputData);
 
-            // 4. Calculate seek time
+            // 4. Calculate seek time - extract duration if needed
             let seekTime = payload.timestamp;
 
             if (payload.unit === "percentage") {
-                // For percentage, we need video duration
-                // ffmpeg.wasm doesn't have a simple probe API, so we'll extract duration from metadata
-                // We'll use a workaround: extract at percentage using the -t flag
-                // For now, let's convert percentage to a seek position (simplified approach)
-                // This is approximate - for production, you'd want to probe duration first
-                seekTime = payload.timestamp; // Will use as percentage with special handling
+                // Extract duration using ffmpeg.wasm logging
+                logger.log("Extracting video duration for percentage calculation");
+
+                const logs: string[] = [];
+                ffmpeg.on("log", ({ message }: { message: string }) => {
+                    logs.push(message);
+                });
+
+                // Run ffmpeg -i to get metadata (will "fail" but output metadata to logs)
+                try {
+                    await ffmpeg.exec(['-i', 'input.mp4']);
+                } catch (e) {
+                    // Expected to "fail" - we just need the logs
+                }
+
+                // Parse duration from logs
+                const metaLog = logs.join("\n");
+                const durationMatch = metaLog.match(/Duration: (\d+):(\d+):(\d+\.\d+)/);
+
+                if (!durationMatch) {
+                    throw new Error("Could not extract video duration from metadata");
+                }
+
+                const [, hours, minutes, seconds] = durationMatch;
+                const durationInSeconds =
+                    Number(hours) * 3600 +
+                    Number(minutes) * 60 +
+                    Number(seconds);
+
+                seekTime = (payload.timestamp / 100) * durationInSeconds;
+                logger.log("Calculated seek time from percentage", {
+                    percentage: payload.timestamp,
+                    duration: durationInSeconds,
+                    seekTime
+                });
             }
 
             logger.log("Extracting frame", { seekTime, unit: payload.unit });
 
             // 5. Extract frame using FFmpeg
-            let ffmpegArgs: string[];
-
-            if (payload.unit === "percentage") {
-                // Use -ss with percentage (ffmpeg supports this via -sseof for end-relative)
-                // Simplified: we'll extract middle frame and approximate
-                // For better accuracy, probe duration first
-                ffmpegArgs = [
-                    '-i', 'input.mp4',
-                    '-vf', `select='isnan(prev_selected_t)+gte(t-prev_selected_t\\,${seekTime}/100*5)'`, // Approximate
-                    '-frames:v', '1',
-                    'output.png'
-                ];
-            } else {
-                // Seek to specific second
-                ffmpegArgs = [
-                    '-ss', seekTime.toString(),
-                    '-i', 'input.mp4',
-                    '-frames:v', '1',
-                    'output.png'
-                ];
-            }
-
-            await ffmpeg.exec(ffmpegArgs);
+            await ffmpeg.exec([
+                '-ss', seekTime.toString(),
+                '-i', 'input.mp4',
+                '-frames:v', '1',
+                'output.png'
+            ]);
 
             logger.log("FFmpeg.wasm frame extraction completed");
 
