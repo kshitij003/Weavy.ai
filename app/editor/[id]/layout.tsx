@@ -14,6 +14,22 @@ export default function EditorLayout({
     const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const [isQuickAccessOpen, setIsQuickAccessOpen] = useState(false);
+    const { addNodeContent } = useEditorStore();
+
+    const quickAccessItems = [
+        { icon: Type, label: "Text Node", type: 'text' as NodeType },
+        { icon: ImagePlus, label: "Upload Image Node", type: 'image' as NodeType },
+        { icon: Video, label: "Upload Video Node", type: 'video' as NodeType },
+        { icon: Sparkles, label: "Run Any LLM Node", type: 'llm' as NodeType },
+        { icon: Crop, label: "Crop Image Node", type: 'crop' as NodeType },
+        { icon: Film, label: "Extract Frame From Video Node", type: 'frame' as NodeType },
+    ];
+
+    const onDragStart = (event: React.DragEvent, nodeType: string) => {
+        event.dataTransfer.setData('application/reactflow', nodeType);
+        event.dataTransfer.effectAllowed = 'move';
+    };
 
     const filteredItems = quickAccessItems.filter(item =>
         item.label.toLowerCase().includes(searchQuery.toLowerCase())
