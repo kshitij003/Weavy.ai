@@ -15,7 +15,7 @@ export const DEMO_WORKFLOW = {
                 label: "Product Image",
                 // Using a placeholder image that ends in .png/jpg to satisfy validation if needed, 
                 // or a data URI. Using a placeholder URL for now.
-                image: "/bluetoothheadphones-2048px-6141.webp"
+                image: "https://res.cloudinary.com/dmd8yngui/image/upload/v1770406601/bluetoothheadphones-2048px-6141_evjsij.webp"
             },
         },
         {
@@ -62,7 +62,7 @@ export const DEMO_WORKFLOW = {
             position: { x: 0, y: 600 },
             data: {
                 label: "Product Video",
-                video: "/WhatsApp Video 2026-02-06 at 9.54.48 PM.mp4"
+                video: "https://res.cloudinary.com/dmd8yngui/video/upload/v1770406620/WhatsApp_Video_2026-02-06_at_9.54.48_PM_cpfbhz.mp4"
             },
         },
         {
