@@ -1,0 +1,64 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model WorkflowRun {
+  id          String   @id @default(cuid())
+  userId      String
+  triggerType String   @default("FULL") // FULL, PARTIAL, SINGLE
+  status      String   // RUNNING, COMPLETED, FAILED
+  startedAt   DateTime @default(now())
+  endedAt     DateTime?
+  duration    Int?     // milliseconds
+
+  steps       WorkflowStep[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model WorkflowStep {
+  id        String      @id @default(cuid())
+  runId     String
+  run       WorkflowRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  
+  nodeId    String
+  nodeType  String
+  nodeLabel String?
+  status    String      // PENDING, RUNNING, COMPLETED, FAILED
+  
+  inputs    Json?
+  outputs   Json?
+  error     String?
+  
+
+  startedAt DateTime
+  endedAt   DateTime?
+  duration  Int?
+
+  createdAt DateTime @default(now())
+}
+
+model Workflow {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String
+  description  String?
+  thumbnailUrl String?
+  
+  nodes        Json     @default("[]")
+  edges        Json     @default("[]")
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+}

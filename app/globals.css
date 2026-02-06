@@ -1,0 +1,177 @@
+@import "tailwindcss";
+
+/* Font smoothing */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -o-font-smoothing: antialiased;
+}
+
+/* No spring native browser behaviour on scroll over the top and bottom edges */
+html,
+body {
+    overscroll-behavior-y: none;
+}
+
+/* Responsive font sizing */
+html,
+body {
+    font-size: 1vw;
+}
+
+@media screen and (min-width: 1440px) {
+
+    html,
+    body {
+        font-size: 14.4px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+
+    html,
+    body {
+        font-size: 1.8vw;
+    }
+}
+
+/* Lenis smooth scroll CSS tweak */
+html.lenis {
+    height: auto !important;
+}
+
+body.lenis {
+    height: auto !important;
+}
+
+/* Nav button forced styling */
+.huge_nav-button {
+    mix-blend-mode: normal !important;
+}
+
+/* Leader Line z-index */
+.leader-line {
+    z-index: 10 !important;
+}
+
+/* Splide Track */
+.splide__track {
+    overflow: visible;
+}
+
+/* Tools Image (fade effect) */
+.splide.tools-image .splide__slide {
+    opacity: 0;
+    transform: none !important;
+    transition: opacity 0.15s ease;
+    will-change: opacity;
+    z-index: 1;
+}
+
+.splide.tools-image .splide__slide.is-active {
+    opacity: 1;
+    z-index: 2;
+}
+
+/* Text Tags (Chips) */
+.slide_super-chip {
+    background-color: white;
+    color: black;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.splide__slide.is-active .slide_super-chip {
+    background-color: #F7FF9E;
+    color: black;
+}
+
+/* General disabled button style */
+.splide button:disabled {
+    opacity: 0.2;
+}
+
+/* Dark theme arrows and pagination */
+.is--dark .splide__arrow {
+    filter: invert(100%);
+}
+
+.is--dark .splide__pagination__page {
+    background-color: #dfdad5;
+}
+
+/* Pill Slider */
+.splide.pill .splide__pagination {
+    display: none;
+}
+
+/* Tall Slider */
+.splide.tall .splide__pagination {
+    display: none;
+}
+
+@layer utilities {
+    .text-balance {
+        text-wrap: balance;
+    }
+}
+
+@keyframes neon-pulse {
+    0% {
+        box-shadow: 0 0 5px #E8FF86, 0 0 10px #E8FF86;
+        border-color: #E8FF86;
+    }
+
+    100% {
+        box-shadow: 0 0 10px #E8FF86, 0 0 20px #E8FF86, 0 0 30px #E8FF86;
+        border-color: #ffffff;
+    }
+}
+
+.neon-border {
+    animation: neon-pulse 1s infinite alternate ease-in-out !important;
+    border-color: #E8FF86 !important;
+    z-index: 100 !important;
+    position: relative;
+}
+
+.splide__slide.is-active .text-opacity {
+    color: white;
+}
+
+.splide__slide.is-active:hover .text-opacity {
+    color: #f7ff9e;
+}
+
+.splide__slide.is-active .slider-tall_img,
+.splide__slide.is-active .slider-tall_photo {
+    transform: scale(1.05);
+}
+
+.splide__slide.is-active .rounded {
+    border-radius: 0.75em;
+}
+
+/* Models Section Styles */
+.models_bg-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transform: scale(1);
+    transition: opacity 0.05s ease, transform 0.05s ease;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.models_item {
+    color: #ffffff;
+    transition: color 0.15s ease;
+}
+
+.models_bg-image.active {
+    opacity: 1;
+    transform: scale(1.05);
+}
