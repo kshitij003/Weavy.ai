@@ -3,13 +3,9 @@ declare module 'fluent-ffmpeg' {
     export default ffmpeg;
 }
 
-declare module 'ffmpeg-static' {
-    const ffmpegPath: string | null;
-    export default ffmpegPath;
-}
-
-declare module 'ffprobe-static' {
+declare module '@ffmpeg-installer/ffmpeg' {
     export const path: string;
+    export const version: string;
 }
 
 declare module 'uuid' {

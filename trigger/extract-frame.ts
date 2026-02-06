@@ -1,14 +1,14 @@
 import { task, logger } from "@trigger.dev/sdk/v3";
 import ffmpeg from "fluent-ffmpeg";
-import ffmpegPath from "ffmpeg-static";
-import ffprobeStatic from "ffprobe-static";
+import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
 import fs from "fs/promises";
 import path from "path";
 import os from "os";
 import { v4 as uuidv4 } from "uuid";
 
-ffmpeg.setFfmpegPath(ffmpegPath!);
-ffmpeg.setFfprobePath(ffprobeStatic.path);
+ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+// Note: Using ffprobe bundled with ffmpeg package
+ffmpeg.setFfprobePath(ffmpegInstaller.path.replace('ffmpeg', 'ffprobe'));
 
 export const extractFrame = task({
     id: "extract-frame",
