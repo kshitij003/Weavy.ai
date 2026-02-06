@@ -5,11 +5,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
 
-const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
-const ffprobePath = require('@ffprobe-installer/ffprobe').path;
-
-ffmpeg.setFfmpegPath(ffmpegPath);
-ffmpeg.setFfprobePath(ffprobePath);
+// Configure ffmpeg - we rely on the system ffmpeg installed via trigger.config.ts
+// or local ffmpeg if available in PATH.
 
 export const extractFrame = task({
     id: "extract-frame",
@@ -43,8 +40,8 @@ export const extractFrame = task({
             // 2. Get duration if needed
             let seekTime = timestamp;
             if (unit === 'percentage') {
-                const metadata = await new Promise<ffmpeg.FfprobeData>((resolve, reject) => {
-                    ffmpeg.ffprobe(inputPath, (err, data) => {
+                const metadata = await new Promise<any>((resolve, reject) => {
+                    ffmpeg.ffprobe(inputPath, (err: any, data: any) => {
                         if (err) reject(err);
                         else resolve(data);
                     });

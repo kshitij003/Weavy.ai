@@ -17,4 +17,14 @@ export default defineConfig({
         },
     },
     dirs: ["./trigger"],
+    build: {
+        extensions: [
+            {
+                name: "install-ffmpeg",
+                onBuild: async (context: any) => {
+                    await context.addAptGetPackages(["ffmpeg"]);
+                },
+            } as any,
+        ],
+    },
 });

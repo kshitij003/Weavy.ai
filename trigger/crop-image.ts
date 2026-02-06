@@ -5,14 +5,12 @@ import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
 
-// Configure ffmpeg with static binaries
-// We use a try-catch pattern or conditional because paths differ locally vs cloud sometimes, 
-// but referencing the installed packages is key.
-const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
-const ffprobePath = require('@ffprobe-installer/ffprobe').path;
-
-ffmpeg.setFfmpegPath(ffmpegPath);
-ffmpeg.setFfprobePath(ffprobePath);
+// Configure ffmpeg - we rely on the system ffmpeg installed via trigger.config.ts
+// or local ffmpeg if available in PATH.
+// const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+// const ffprobePath = require('@ffprobe-installer/ffprobe').path;
+// ffmpeg.setFfmpegPath(ffmpegPath);
+// ffmpeg.setFfprobePath(ffprobePath);
 
 export const cropImage = task({
     id: "crop-image",
@@ -44,14 +42,14 @@ export const cropImage = task({
             }
 
             // 2. Get dimensions
-            const metadata = await new Promise<ffmpeg.FfprobeData>((resolve, reject) => {
-                ffmpeg.ffprobe(inputPath, (err, data) => {
+            const metadata = await new Promise<any>((resolve, reject) => {
+                ffmpeg.ffprobe(inputPath, (err: any, data: any) => {
                     if (err) reject(err);
                     else resolve(data);
                 });
             });
 
-            const stream = metadata.streams.find(s => s.codec_type === 'video' || s.codec_type === 'audio' ? false : true) || metadata.streams[0];
+            const stream = metadata.streams.find((s: any) => s.codec_type === 'video' || s.codec_type === 'audio' ? false : true) || metadata.streams[0];
             const imgWidth = stream?.width || 0;
             const imgHeight = stream?.height || 0;
 
