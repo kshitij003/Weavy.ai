@@ -79,7 +79,7 @@ export const extractFrame = task({
                     .seekInput(seekTime)
                     .frames(1)
                     .on('end', resolve)
-                    .on('error', (err) => {
+                    .on('error', (err: any) => {
                         logger.error("FFmpeg extract error", { err });
                         reject(err);
                     })

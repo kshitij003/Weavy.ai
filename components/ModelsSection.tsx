@@ -2,6 +2,13 @@
 
 import { useEffect } from 'react';
 
+declare global {
+    interface Window {
+        gsap: any;
+        ScrollTrigger: any;
+    }
+}
+
 export default function ModelsSection() {
     useEffect(() => {
         const initModelsScroll = () => {
@@ -25,14 +32,14 @@ export default function ModelsSection() {
 
             let lastIndex = -1;
 
-            function activateItem(index) {
+            function activateItem(index: number) {
                 if (index === lastIndex) return;
                 lastIndex = index;
 
                 const activeColor = "#f7ff9e";
                 const inactiveColor = "#ffffff";
 
-                backgrounds.forEach((bg, i) => {
+                backgrounds.forEach((bg: any, i: number) => {
                     const isActive = i === index;
 
                     gsap.to(bg, {
@@ -53,7 +60,7 @@ export default function ModelsSection() {
                                     video.playsInline = true;
                                     video.setAttribute("playsinline", "");
                                     video.setAttribute("webkit-playsinline", "");
-                                    video.play().catch(err => {
+                                    video.play().catch((err: any) => {
                                         console.warn("Autoplay blocked:", err);
                                     });
                                 }
@@ -67,7 +74,7 @@ export default function ModelsSection() {
                     }
                 });
 
-                items.forEach((el, i) => {
+                items.forEach((el: any, i: number) => {
                     gsap.to(el, {
                         color: i === index ? activeColor : inactiveColor,
                         duration: 0.08,
@@ -78,7 +85,7 @@ export default function ModelsSection() {
 
             const isMobile = window.innerWidth <= 768;
 
-            items.forEach((item, i) => {
+            items.forEach((item: any, i: number) => {
                 ScrollTrigger.create({
                     trigger: item,
                     start: isMobile ? 'top 40%' : 'top 20%',
@@ -95,7 +102,7 @@ export default function ModelsSection() {
                     const viewportHeight = window.innerHeight;
                     let found = false;
 
-                    items.forEach((item, i) => {
+                    items.forEach((item: any, i: number) => {
                         const rect = item.getBoundingClientRect();
                         const top = rect.top + scrollY;
                         const bottom = top + rect.height;

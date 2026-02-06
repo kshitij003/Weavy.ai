@@ -47,7 +47,7 @@ export function FrameNode({ id, data }: NodeProps) {
         // Define variables outside try block for access in finally
         let finalOutput = "";
         let errorMsg: string | undefined = undefined;
-        let inputs: any = {};
+        let inputs: Record<string, unknown> = {};
 
         try {
             // Helper to get value
@@ -260,7 +260,7 @@ export function FrameNode({ id, data }: NodeProps) {
                             <img src={data.output} alt="Extracted Frame" className="w-full h-auto max-h-32 object-contain bg-black" />
                         </div>
                     ) : (
-                        data.output && (
+                        !!data.output && (
                             <div className="mb-3 p-2 bg-[#1F1F21] rounded text-[10px] text-gray-400 whitespace-pre-wrap">
                                 {String(data.output)}
                             </div>

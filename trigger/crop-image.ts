@@ -121,7 +121,7 @@ export const cropImage = task({
                         `-vf crop=${finalW}:${finalH}:${finalX}:${finalY}`
                     ])
                     .on('end', resolve)
-                    .on('error', (err) => {
+                    .on('error', (err: any) => {
                         logger.error("FFmpeg error", { err });
                         reject(err);
                     })

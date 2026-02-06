@@ -1,16 +1,28 @@
 'use client';
 
-import { useEffect } from 'react';
-import HeroSection from '@/components/HeroSection';
-import ModelsSection from '@/components/ModelsSection';
-import ToolsSection from '@/components/ToolsSection';
-import OutcomeSection from '@/components/OutcomeSection';
-import WorkflowSection from '@/components/WorkflowSection';
-import WorkflowsSlider from '@/components/WorkflowsSlider';
-import Footer from '@/components/Footer';
+import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+
+// -----------------------------------------------------------------------------
+// ✅ CRITICAL FIX: Use Dynamic Imports with { ssr: false }
+// This prevents the "ReferenceError: self is not defined" crash by ensuring
+// these components are ONLY loaded in the browser, not during the server build.
+// -----------------------------------------------------------------------------
+const HeroSection = dynamic(() => import('@/components/HeroSection'), { ssr: false });
+const ModelsSection = dynamic(() => import('@/components/ModelsSection'), { ssr: false });
+const ToolsSection = dynamic(() => import('@/components/ToolsSection'), { ssr: false });
+const OutcomeSection = dynamic(() => import('@/components/OutcomeSection'), { ssr: false });
+const WorkflowSection = dynamic(() => import('@/components/WorkflowSection'), { ssr: false });
+const WorkflowsSlider = dynamic(() => import('@/components/WorkflowsSlider'), { ssr: false });
+const Footer = dynamic(() => import('@/components/Footer'), { ssr: false });
 
 export default function Home() {
+  // Optional: Prevent hydration mismatch if needed, though dynamic imports usually handle it.
+  const [isMounted, setIsMounted] = useState(false);
+
   useEffect(() => {
+    setIsMounted(true);
+
     // Load all external scripts
     const loadScript = (src: string) => {
       return new Promise((resolve, reject) => {
@@ -88,6 +100,15 @@ export default function Home() {
 
     initScripts();
   }, []);
+
+  // Avoid rendering until mounted on client to prevent initial flicker or mismatch
+  if (!isMounted) {
+    return (
+      <div className="w-full h-screen bg-black flex items-center justify-center">
+        {/* Optional: Simple loader while scripts/components initialize */}
+      </div>
+    );
+  }
 
   return (
     <>
