@@ -12,22 +12,12 @@ export default function EditorLayout({
     children: React.ReactNode;
 }) {
     const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
-    const [isQuickAccessOpen, setIsQuickAccessOpen] = useState(false);
-    const { addNodeContent } = useEditorStore();
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
 
-    const quickAccessItems = [
-        { icon: Type, label: "Text Node", type: 'text' as NodeType },
-        { icon: ImagePlus, label: "Upload Image Node", type: 'image' as NodeType },
-        { icon: Video, label: "Upload Video Node", type: 'video' as NodeType },
-        { icon: Sparkles, label: "Run Any LLM Node", type: 'llm' as NodeType },
-        { icon: Crop, label: "Crop Image Node", type: 'crop' as NodeType },
-        { icon: Film, label: "Extract Frame From Video Node", type: 'frame' as NodeType },
-    ];
-
-    const onDragStart = (event: React.DragEvent, nodeType: string) => {
-        event.dataTransfer.setData('application/reactflow', nodeType);
-        event.dataTransfer.effectAllowed = 'move';
-    };
+    const filteredItems = quickAccessItems.filter(item =>
+        item.label.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     return (
         <div className="flex h-screen bg-[#0e0e0e] overflow-hidden relative">
@@ -39,11 +29,23 @@ export default function EditorLayout({
                 )}
             >
                 <div className="flex flex-col items-center gap-6 justify-center h-full">
-                    <button className="text-gray-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/5">
+                    <button
+                        onClick={() => {
+                            setIsSearchOpen(!isSearchOpen);
+                            setIsQuickAccessOpen(false);
+                        }}
+                        className={cn(
+                            "transition-colors p-2 rounded-lg hover:bg-white/5",
+                            isSearchOpen ? "text-[#E8FF86] bg-white/10" : "text-gray-400 hover:text-white"
+                        )}
+                    >
                         <Search size={24} strokeWidth={1.5} />
                     </button>
                     <button
-                        onClick={() => setIsQuickAccessOpen(!isQuickAccessOpen)}
+                        onClick={() => {
+                            setIsQuickAccessOpen(!isQuickAccessOpen);
+                            setIsSearchOpen(false);
+                        }}
                         className={cn(
                             "transition-colors p-2 rounded-lg hover:bg-white/5",
                             isQuickAccessOpen ? "text-[#E8FF86] bg-white/10" : "text-gray-400 hover:text-white"
@@ -53,6 +55,45 @@ export default function EditorLayout({
                     </button>
                 </div>
             </aside>
+
+            {/* Search Panel */}
+            <div
+                className={cn(
+                    "absolute top-1/2 -translate-y-1/2 z-30 flex flex-col gap-2 rounded-xl border border-[#1F1F21] bg-[#09090A] p-3 shadow-xl transition-all duration-300 w-64 max-h-[400px]",
+                    isSearchOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 pointer-events-none",
+                    isLeftCollapsed ? "left-4" : "left-20"
+                )}
+            >
+                <input
+                    type="text"
+                    placeholder="Search nodes..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-[#1F1F21] border border-[#2A2A2D] rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-[#E8FF86] placeholder:text-gray-500 mb-2"
+                    autoFocus
+                />
+
+                <div className="flex flex-col gap-1 overflow-y-auto">
+                    {filteredItems.length === 0 ? (
+                        <div className="text-gray-500 text-xs text-center py-4">
+                            No nodes found
+                        </div>
+                    ) : (
+                        filteredItems.map((item, i) => (
+                            <button
+                                key={i}
+                                className="group flex items-center gap-3 p-2 text-gray-400 transition-colors hover:bg-white/10 hover:text-white rounded-lg cursor-grab active:cursor-grabbing text-left"
+                                draggable
+                                onDragStart={(event) => onDragStart(event, item.type)}
+                                onClick={() => addNodeContent(item.type)}
+                            >
+                                <item.icon size={18} strokeWidth={1.5} className="shrink-0" />
+                                <span className="text-sm font-medium">{item.label}</span>
+                            </button>
+                        ))
+                    )}
+                </div>
+            </div>
 
             {/* Quick Access Panel */}
             <div
