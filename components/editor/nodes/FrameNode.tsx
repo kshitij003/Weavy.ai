@@ -72,7 +72,7 @@ export function FrameNode({ id, data }: NodeProps) {
 
             const timestamp = getValue("timestamp", params.timestamp);
 
-            inputs = { video: video ? "Video URL..." : "None", timestamp, unit: 'seconds' };
+            inputs = { video: video ? "Video URL..." : "None", timestamp, unit };
 
             if (!video) {
                 updateNodeData(id, { output: "Error: No video connected or provided." });
@@ -80,25 +80,51 @@ export function FrameNode({ id, data }: NodeProps) {
                 return;
             }
 
+            // 1. Trigger Task (Async)
             const result = await runExtractFrame({
                 video,
                 timestamp,
-                unit: 'seconds'
-            });
+                unit
+            }, false); // wait = false
 
-            if (result.success) {
-                finalOutput = result.output;
-                updateNodeData(id, { output: result.output });
+            if (!result.success || !result.handleId) {
+                throw new Error(result.error || "Failed to start task");
+            }
+
+            const handleId = result.handleId;
+            updateNodeData(id, { output: "Task Started... Waiting for completion..." });
+
+            // 2. Poll for Completion
+            // Dynamically import checkTaskStatus to ensure it works in client component if needed, 
+            // though standard import should work for Server Actions.
+            const { checkTaskStatus } = await import("@/app/actions/check-task-status");
+
+            let status = "RUNNING";
+            let pollResult: any = null;
+
+            while (status === "RUNNING" || status === "QUEUED" || status === "EXECUTING") {
+                await new Promise(r => setTimeout(r, 1000));
+                pollResult = await checkTaskStatus(handleId);
+                status = pollResult.status;
+
+                if (status === "RUNNING" || status === "QUEUED") {
+                    // updateNodeData(id, { output: `Processing... (${status})` });
+                }
+            }
+
+            if (status === "COMPLETED") {
+                finalOutput = pollResult.output;
+                updateNodeData(id, { output: finalOutput });
             } else {
-                errorMsg = result.error;
-                finalOutput = `Error: ${result.error}`;
+                errorMsg = pollResult.error || "Task failed";
+                finalOutput = `Error: ${errorMsg}`;
                 updateNodeData(id, { output: finalOutput });
             }
 
         } catch (error: any) {
             console.error(error);
             errorMsg = error.message;
-            finalOutput = "An unexpected error occurred.";
+            finalOutput = `Error: ${errorMsg}`;
             updateNodeData(id, { output: finalOutput });
         } finally {
             setIsLoading(false);

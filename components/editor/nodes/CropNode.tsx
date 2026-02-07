@@ -127,25 +127,46 @@ export function CropNode({ id, data }: NodeProps) {
                 return;
             }
 
+            // 1. Trigger Task (Async)
             const result = await runCropImage({
                 image,
                 x,
                 y,
                 width,
                 height,
-            });
+            }, false); // wait = false
 
-            if (result.success) {
-                finalOutput = result.output;
-                updateNodeData(id, { output: result.output });
+            if (!result.success || !result.handleId) {
+                throw new Error(result.error || "Failed to start task");
+            }
+
+            const handleId = result.handleId;
+            updateNodeData(id, { output: "Task Started... Waiting for completion..." });
+
+            // 2. Poll for Completion
+            const { checkTaskStatus } = await import("@/app/actions/check-task-status");
+
+            let status = "RUNNING";
+            let pollResult: any = null;
+
+            while (status === "RUNNING" || status === "QUEUED" || status === "EXECUTING" || status === "WAITING_FOR_DEPLOY") {
+                await new Promise(r => setTimeout(r, 1000));
+                pollResult = await checkTaskStatus(handleId);
+                status = pollResult.status;
+            }
+
+            if (status === "COMPLETED") {
+                finalOutput = pollResult.output;
+                updateNodeData(id, { output: finalOutput });
             } else {
-                errorMsg = result.error;
-                finalOutput = `Error: ${result.error}`;
+                errorMsg = pollResult.error || "Task failed";
+                finalOutput = `Error: ${errorMsg}`;
                 updateNodeData(id, { output: finalOutput });
             }
-        } catch (err) {
+
+        } catch (err: any) {
             console.error(err);
-            errorMsg = "Unexpected error occurred.";
+            errorMsg = err.message || "Unexpected error occurred.";
             finalOutput = errorMsg;
             updateNodeData(id, { output: finalOutput });
         } finally {

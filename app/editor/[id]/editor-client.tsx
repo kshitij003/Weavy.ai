@@ -325,7 +325,7 @@ export default function EditorClient({ initialNodes, initialEdges, workflowId }:
                                 alert("Please login to run workflows.");
                                 return;
                             }
-                            executeWorkflow(nodes, edges, (id, data) => {
+                            executeWorkflow(getNodes(), getEdges(), (id, data) => {
                                 setNodes((nds) => nds.map((n) => {
                                     if (n.id === id) {
                                         return { ...n, data: { ...n.data, ...data } };
