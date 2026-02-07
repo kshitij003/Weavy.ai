@@ -11,10 +11,10 @@ type WorkflowRunHistoryItem = Awaited<ReturnType<typeof getWorkflowRuns>>[number
 interface HistorySidebarProps {
     userId: string | null | undefined;
     isOpen: boolean;
-
+    refreshTrigger?: number;
 }
 
-export function HistorySidebar({ userId, isOpen }: HistorySidebarProps) {
+export function HistorySidebar({ userId, isOpen, refreshTrigger = 0 }: HistorySidebarProps) {
     const [runs, setRuns] = useState<WorkflowRunHistoryItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [expandedRunId, setExpandedRunId] = useState<string | null>(null);
@@ -36,7 +36,7 @@ export function HistorySidebar({ userId, isOpen }: HistorySidebarProps) {
         if (isOpen && userId) {
             fetchRuns();
         }
-    }, [isOpen, userId]);
+    }, [isOpen, userId, refreshTrigger]);
 
     if (!isOpen) return null;
 

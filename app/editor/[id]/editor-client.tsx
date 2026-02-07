@@ -44,6 +44,19 @@ export default function EditorClient({ initialNodes, initialEdges, workflowId }:
     const [isHistoryOpen, setIsHistoryOpen] = useState(true);
     const reactFlowWrapper = useRef(null);
 
+    // History Refresh Logic
+    const [historyRefreshTrigger, setHistoryRefreshTrigger] = useState(0);
+    const isRunning = useExecutionStore(s => s.isWorkflowRunning);
+    const wasRunning = useRef(false);
+
+    useEffect(() => {
+        if (!isRunning && wasRunning.current) {
+            // Just finished
+            setHistoryRefreshTrigger(prev => prev + 1);
+        }
+        wasRunning.current = isRunning;
+    }, [isRunning]);
+
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
     const { screenToFlowPosition, getNodes, getEdges, deleteElements } = useReactFlow();
@@ -294,9 +307,12 @@ export default function EditorClient({ initialNodes, initialEdges, workflowId }:
                 </button>
             </div>
 
+
+
             <HistorySidebar
                 userId={userId}
                 isOpen={isHistoryOpen}
+                refreshTrigger={historyRefreshTrigger}
             />
 
             {/* Run Button positioned to the left of the History Sidebar */}
