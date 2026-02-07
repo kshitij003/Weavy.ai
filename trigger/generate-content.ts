@@ -1,9 +1,6 @@
 import { task, logger } from "@trigger.dev/sdk/v3";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Initialize Gemini
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
-
 export const generateContent = task({
     id: "generate-content",
     // Set an optional maxDuration to prevent the task from running indefinitely
@@ -11,6 +8,13 @@ export const generateContent = task({
     run: async (payload: { systemPrompt?: string; userPrompt: string; image?: string }, { ctx }) => {
         logger.log("Starting Gemini generation task", { payload });
 
+        const apiKey = process.env.GOOGLE_API_KEY;
+        if (!apiKey) {
+            throw new Error("GOOGLE_API_KEY is missing from environment variables!");
+        }
+
+        // Initialize Gemini inside the task to ensure it reads the latest Env Var
+        const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
         const parts: any[] = [];
