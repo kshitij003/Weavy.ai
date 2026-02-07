@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { createWorkflow } from "@/app/actions/create-workflow";
 
 import { UserButton, useUser } from "@clerk/nextjs";
 import { Plus, Folder, Users, LayoutGrid } from "lucide-react";
@@ -33,10 +34,12 @@ export function Sidebar() {
                 </div>
 
                 {/* Create New Button */}
-                <Link href="/editor/untitled" className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#E8FF86] px-4 py-3 text-sm font-semibold text-black transition-colors hover:bg-[#d6f060] active:scale-[0.98]">
-                    <Plus size={18} strokeWidth={2.5} />
-                    Create New File
-                </Link>
+                <form action={createWorkflow}>
+                    <button type="submit" className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#E8FF86] px-4 py-3 text-sm font-semibold text-black transition-colors hover:bg-[#d6f060] active:scale-[0.98]">
+                        <Plus size={18} strokeWidth={2.5} />
+                        Create New File
+                    </button>
+                </form>
             </div>
         </div>
     );
