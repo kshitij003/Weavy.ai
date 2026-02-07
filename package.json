@@ -11,6 +11,10 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.37.2",
+    "@google/generative-ai": "^0.24.1",
+    "@google/model-viewer": "^4.1.0",
+    "@prisma/client": "^7.3.0",
+    "@splidejs/splide": "^4.1.4",
     "@trigger.dev/sdk": "4.3.3",
     "@types/fluent-ffmpeg": "^2.1.28",
     "@types/uuid": "^10.0.0",
