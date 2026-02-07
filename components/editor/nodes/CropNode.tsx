@@ -167,7 +167,7 @@ export function CropNode({ id, data }: NodeProps) {
         } catch (err: any) {
             console.error(err);
             errorMsg = err.message || "Unexpected error occurred.";
-            finalOutput = errorMsg;
+            finalOutput = `Error: ${errorMsg}`;
             updateNodeData(id, { output: finalOutput });
         } finally {
             setIsLoading(false);
